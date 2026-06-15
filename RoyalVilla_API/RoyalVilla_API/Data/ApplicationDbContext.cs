@@ -12,7 +12,7 @@ namespace RoyalVilla_API.Data
         //public ApplicationDbContext(DbContextOptions options) : DbContext(options) { }
 
         // Create a constructor and pass options to the base class
-        public ApplicationDbContext(DbContextOptions options) : base(options) { }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
     }
 }
