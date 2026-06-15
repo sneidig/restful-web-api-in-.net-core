@@ -14,5 +14,12 @@ namespace RoyalVilla_API.Data
         // Create a constructor and pass options to the base class
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Villa>()
+                .Property(v => v.Rate)
+                .HasPrecision(5, 2);
+        }
+
     }
 }
