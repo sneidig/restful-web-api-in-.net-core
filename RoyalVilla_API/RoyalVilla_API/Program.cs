@@ -8,9 +8,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Register DbContext with IoC container
 //  ApplicationDbContext is the class that builds DbContext
+var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(defaultConnection))
+{
+    throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
+}
+
 builder.Services.AddDbContext<ApplicationDbContext>(option =>
 {
-    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    option.UseSqlServer(defaultConnection);
 });
 
 builder.Services.AddControllers();
