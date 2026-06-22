@@ -73,7 +73,7 @@ namespace RoyalVilla_API.Controllers
                 await _db.Villa.AddAsync(villa);
                 await _db.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(CreateVilla), new { id=villa.Id }, villa);
+                return CreatedAtAction(nameof(GetVillaById), new { id=villa.Id }, villa);
             }
             catch (Exception ex)
             {
