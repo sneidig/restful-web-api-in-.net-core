@@ -19,6 +19,5 @@ namespace RoyalVilla_API.Models.DTO
             [Range(1, int.MaxValue)]
             public int Occupancy { get; set; }
             public string? ImageUrl { get; set; }
-            public DateTime CreatedDate { get; set; }
     }
 }

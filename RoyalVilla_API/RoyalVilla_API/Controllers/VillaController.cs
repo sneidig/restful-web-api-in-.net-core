@@ -69,6 +69,7 @@ namespace RoyalVilla_API.Controllers
                 }
 
                 Villa villa = _mapper.Map<Villa>(villaDTO);
+                villa.CreatedDate = DateTime.UtcNow;
 
                 await _db.Villa.AddAsync(villa);
                 await _db.SaveChangesAsync();
