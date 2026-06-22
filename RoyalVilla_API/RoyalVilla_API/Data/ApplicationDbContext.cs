@@ -6,7 +6,7 @@ namespace RoyalVilla_API.Data
     public class ApplicationDbContext : DbContext
     {
 
-        public DbSet<Villa> Villas { get; set; }
+        public DbSet<Villa> Villa { get; set; }
 
         // Alternate modern C# syntax
         //public ApplicationDbContext(DbContextOptions options) : DbContext(options) { }
