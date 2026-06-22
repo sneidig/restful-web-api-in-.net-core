@@ -13,11 +13,13 @@ namespace RoyalVilla_API.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly IMapper _mapper;
+        private readonly ILogger<VillaController> _logger;
 
-        public VillaController(ApplicationDbContext db, IMapper mapper)
+        public VillaController(ApplicationDbContext db, IMapper mapper, ILogger<VillaController> logger)
         {
             _db = db;
             _mapper = mapper;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -49,8 +51,9 @@ namespace RoyalVilla_API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, 
-                    $"An error occurred while retrieving villa with ID {id}: {ex.Message}");
+                _logger.LogError(ex, "Error retrieving villa with ID {VillaId}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "An error occurred while retrieving the villa.");
             }
         }
 
@@ -74,8 +77,9 @@ namespace RoyalVilla_API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error creating villa");
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    $"An error occurred while creating the villa: {ex.Message}");
+                    "An error occurred while creating the villa.");
             }
         }
 
@@ -111,8 +115,9 @@ namespace RoyalVilla_API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error updating villa with ID {VillaId}", id);
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    $"An error occurred while updating the villa: {ex.Message}");
+                    "An error occurred while updating the villa.");
             }
         }
 
@@ -138,8 +143,9 @@ namespace RoyalVilla_API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error deleting villa with ID {VillaId}", id);
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    $"An error occurred while deleting the villa: {ex.Message}");
+                    "An error occurred while deleting the villa.");
             }
         }
 
