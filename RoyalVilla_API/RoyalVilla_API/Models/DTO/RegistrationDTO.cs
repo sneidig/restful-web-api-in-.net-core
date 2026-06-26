@@ -16,8 +16,5 @@ namespace RoyalVilla_API.Models.DTO
         [Required]
         public required string Password { get; set; }
 
-        [MaxLength(50)]
-        public required string Role { get; set; } = "Customer";
-
     }
 }
