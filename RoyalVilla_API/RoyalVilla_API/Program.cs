@@ -29,6 +29,7 @@ builder.Services.AddAutoMapper(o => {
     // using RevereMap will cover both possible source and destination mappings
     o.CreateMap<Villa, VillaCreateDTO>().ReverseMap();
     o.CreateMap<Villa, VillaUpdateDTO>().ReverseMap();
+    o.CreateMap<Villa, VillaDTO>().ReverseMap();
 });
 
 var app = builder.Build();
