@@ -36,7 +36,7 @@ namespace RoyalVilla_API.Models.DTO
 
 
         public static ApiResponse<TData> NoContent(string message = "Operation Completed Successfully") =>
-                                                    Create(false, 204, message);
+                                                    Create(true, 204, message);
 
 
         public static ApiResponse<TData> NotFound(string message="Resource not found") =>
