@@ -40,7 +40,7 @@ namespace RoyalVilla_API.Controllers
             {
                 if (id <= 0)
                 {
-                    return NotFound(ApiResponse<object>.NotFound("Villa ID must be greater than 0"));
+                    return NotFound(ApiResponse<object>.BadRequest("Villa ID must be greater than 0"));
                 }
 
                 var villa = await _db.Villa.FirstOrDefaultAsync(u => u.Id == id);
