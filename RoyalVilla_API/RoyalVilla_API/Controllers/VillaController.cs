@@ -23,6 +23,8 @@ namespace RoyalVilla_API.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTO>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<IEnumerable<VillaDTO>>>> GetVillas()
         {
             var villas = await _db.Villa.ToListAsync();
@@ -34,6 +36,10 @@ namespace RoyalVilla_API.Controllers
 
 
         [HttpGet("{id:int}")]
+        [ProducesResponseType(typeof(ApiResponse<VillaDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ApiResponse<VillaDTO>>> GetVillaById(int id)
         {
             try
@@ -54,21 +60,24 @@ namespace RoyalVilla_API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving villa with ID {VillaId}", id);
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "An error occurred while retrieving the villa.");
+                var errorResponse = ApiResponse<object>.Error(500, "", ex.Message);
+                return StatusCode(500, errorResponse);
             }
         }
 
 
         [HttpPost()]
-        public async Task<ActionResult<VillaCreateDTO>> CreateVilla(VillaCreateDTO villaDTO)
+        [ProducesResponseType(typeof(ApiResponse<VillaDTO>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<ApiResponse<VillaCreateDTO>>> CreateVilla(VillaCreateDTO villaDTO)
         {
             try
             {
                 if (villaDTO == null)
                 {
-                    return BadRequest("Villa data is required");
+                    return BadRequest(ApiResponse<object>.BadRequest("Villa data is required"));
                 }
 
                 var duplicateVilla = await _db.Villa.FirstOrDefaultAsync(u =>
@@ -76,7 +85,7 @@ namespace RoyalVilla_API.Controllers
 
                 if (duplicateVilla != null)
                 {
-                    return Conflict($"A villa with the name '{villaDTO.Name}' already exists");
+                    return Conflict(ApiResponse<object>.Conflict($"A villa with the name '{villaDTO.Name}' already exists"));
                 }
 
                 Villa villa = _mapper.Map<Villa>(villaDTO);
@@ -85,37 +94,42 @@ namespace RoyalVilla_API.Controllers
                 await _db.Villa.AddAsync(villa);
                 await _db.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetVillaById), new { id=villa.Id }, _mapper.Map<VillaCreateDTO>(villa));
+                var response = ApiResponse<VillaDTO>.CreatedAt(_mapper.Map<VillaDTO>(villa), "Villa created successfully");
+                return CreatedAtAction(nameof(CreateVilla), new { id=villa.Id }, response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating villa");
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "An error occurred while creating the villa.");
+                var errorResponse = ApiResponse<object>.Error(500, "", ex.Message);
+                return StatusCode(500, errorResponse);
             }
         }
 
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<VillaUpdateDTO>> UpdateVilla(int id, VillaUpdateDTO villaDTO)
+        [ProducesResponseType(typeof(ApiResponse<VillaDTO>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<ApiResponse<VillaDTO>>> UpdateVilla(int id, VillaUpdateDTO villaDTO)
         {
             try
             {
                 if (villaDTO == null)
                 {
-                    return BadRequest("Villa data is required");
+                    return BadRequest(ApiResponse<object>.BadRequest("Villa data is required"));
                 }
 
                 if (id != villaDTO.Id)
                 {
-                    return BadRequest("Villa ID in URL does not match Villa ID in request body");
+                    return BadRequest(ApiResponse<object>.BadRequest("Villa ID in URL does not match Villa ID in request body"));
                 }
 
                 var existingVilla = await _db.Villa.FirstOrDefaultAsync(u => u.Id == id);
 
                 if (existingVilla == null)
                 {
-                    return NotFound($"Villa with ID {id} was not found");
+                    return NotFound(ApiResponse<object>.BadRequest("Villa ID must be greater than 0"));
                 }
 
                 var duplicateVilla = await _db.Villa.FirstOrDefaultAsync(u =>
@@ -124,7 +138,7 @@ namespace RoyalVilla_API.Controllers
 
                 if (duplicateVilla != null)
                 {
-                    return Conflict($"A villa with the name '{villaDTO.Name}' already exists");
+                    return Conflict(ApiResponse<object>.Conflict($"A villa with the name '{villaDTO.Name}' already exists"));
                 }
 
                 _mapper.Map(villaDTO, existingVilla);
@@ -132,20 +146,23 @@ namespace RoyalVilla_API.Controllers
                
                 await _db.SaveChangesAsync();
 
-                return Ok(villaDTO);
+                var response = ApiResponse<VillaDTO>.Ok(_mapper.Map<VillaDTO>(villaDTO), "Villa updated successfully");
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating villa with ID {VillaId}", id);
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "An error occurred while updating the villa.");
+                var errorResponse = ApiResponse<object>.Error(500, "", ex.Message);
+                return StatusCode(500, errorResponse);
             }
         }
 
 
 
         [HttpDelete("{id:int}")]
-        public async Task<ActionResult> DeleteVilla(int id)
+        [ProducesResponseType(typeof(ApiResponse<VillaDTO>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<object>>> DeleteVilla(int id)
         {
             try
             {
@@ -154,19 +171,19 @@ namespace RoyalVilla_API.Controllers
 
                 if (existingVilla == null)
                 {
-                    return NotFound($"Villa with ID {id} was not found");
+                    return NotFound(ApiResponse<object>.NotFound($"Villa with ID {id} was not found"));
                 }
 
                 _db.Villa.Remove(existingVilla);
                 await _db.SaveChangesAsync();
 
-                return NoContent();
+                var response = ApiResponse<object>.NoContent("Villa deleted successfully");
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting villa with ID {VillaId}", id);
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "An error occurred while deleting the villa.");
+                var errorResponse = ApiResponse<object>.Error(500, "", ex.Message);
+                return StatusCode(500, errorResponse);
             }
         }
 
